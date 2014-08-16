@@ -1,0 +1,8 @@
+Temp
+3rdParty
+*.exe
+*.sdf
+*.user
+*.suo
+*.pdb
+*.ilk
