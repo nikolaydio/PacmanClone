@@ -46,15 +46,39 @@ void PacmanApp::Run() {
 			SDL_Delay(MSEC_PER_FRAME - delta_ms);
 		}
 
+		int32_t input_state = 0;
+		int32_t input_events = 0;
+
 		SDL_Event e;
 		while(SDL_PollEvent(&e)) {
 			if(e.type == SDL_QUIT) {
 				status = GAME_EXITING;
+			}else if(e.type == SDL_KEYDOWN) {
+				if(e.key.keysym.sym == SDLK_UP) {
+					input_events |= INPUT_UP;
+				}else if(e.key.keysym.sym == SDLK_DOWN) {
+					input_events |= INPUT_DOWN;
+				}else if(e.key.keysym.sym == SDLK_LEFT) {
+					input_events |= INPUT_LEFT;
+				}else if(e.key.keysym.sym == SDLK_RIGHT) {
+					input_events |= INPUT_RIGHT;
+				}else if(e.key.keysym.sym == SDLK_SPACE) {
+					input_events |= INPUT_FIRE;
+				}else if(e.key.keysym.sym == SDLK_ESCAPE) {
+					input_events |= INPUT_ESC;
+				}
 			}
 		}
+		const Uint8* keyboard = SDL_GetKeyboardState(0);
+		if(keyboard[SDL_SCANCODE_UP]) input_state |= INPUT_UP;
+		if(keyboard[SDL_SCANCODE_DOWN]) input_state |= INPUT_DOWN;
+		if(keyboard[SDL_SCANCODE_LEFT]) input_state |= INPUT_LEFT;
+		if(keyboard[SDL_SCANCODE_RIGHT]) input_state |= INPUT_RIGHT;
+		if(keyboard[SDL_SCANCODE_SPACE]) input_state |= INPUT_FIRE;
+		if(keyboard[SDL_SCANCODE_ESCAPE]) input_state |= INPUT_ESC;
 
 		SDL_RenderClear(renderer);
-		logic->Update(delta_ms / 1000.0f, 0);
+		logic->Update(delta_ms / 1000.0f, input_state, input_events);
 		logic->Render(delta_ms / 1000.0f, renderer);
 		SDL_RenderPresent(renderer);
 	}
