@@ -30,6 +30,10 @@ class PacmanApp {
 public:
 	PacmanApp();
 
+	void LoadGame(const char* filename);
+	void LoadStartScreen();
+	void ExitGame();
+
 	bool Init();
 	void Run();
 	void Done();

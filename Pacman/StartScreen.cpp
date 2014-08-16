@@ -1,6 +1,7 @@
 #include "StartScreen.h"
 #include <SDL_ttf.h>
 #include <cassert>
+#include "PacmanApp.h"
 
 void StartScreen::Init(ResourceManager& res_manager) {
 	//setup start screen;
@@ -27,7 +28,7 @@ void StartScreen::Init(ResourceManager& res_manager) {
 	TTF_CloseFont(font);
 }
 
-void StartScreen::Update(float dt, uint32_t input_state, uint32_t input_events) {
+void StartScreen::Update(float dt, uint32_t input_state, uint32_t input_events, PacmanApp* app) {
 	if((input_events & INPUT_UP) && selected > 0) {
 		SDL_SetTextureAlphaMod(menu_entries[selected].ptr, 100);
 		selected--;
@@ -37,6 +38,16 @@ void StartScreen::Update(float dt, uint32_t input_state, uint32_t input_events) 
 		SDL_SetTextureAlphaMod(menu_entries[selected].ptr, 100);
 		selected++;
 		SDL_SetTextureAlphaMod(menu_entries[selected].ptr, 255);
+	}
+	if(input_events & INPUT_FIRE) {
+		if(selected == 0) {
+			app->LoadGame("data/level1.txt");
+			return;
+		}
+		if(selected == 2) {
+			app->ExitGame();
+			return;
+		}
 	}
 }
 void StartScreen::Render(float dt, SDL_Renderer* renderer) {

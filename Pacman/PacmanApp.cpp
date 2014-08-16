@@ -34,6 +34,16 @@ bool PacmanApp::Init() {
 
 	return true;
 }
+
+void PacmanApp::LoadGame(const char* filename) {
+
+}
+void PacmanApp::LoadStartScreen() {
+
+}
+void PacmanApp::ExitGame() {
+	status = GAME_EXITING;
+}
 void PacmanApp::Run() {
 	int last_frame = SDL_GetTicks();
 	
@@ -78,7 +88,7 @@ void PacmanApp::Run() {
 		if(keyboard[SDL_SCANCODE_ESCAPE]) input_state |= INPUT_ESC;
 
 		SDL_RenderClear(renderer);
-		logic->Update(delta_ms / 1000.0f, input_state, input_events);
+		logic->Update(delta_ms / 1000.0f, input_state, input_events, this);
 		logic->Render(delta_ms / 1000.0f, renderer);
 		SDL_RenderPresent(renderer);
 	}

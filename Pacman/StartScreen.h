@@ -13,6 +13,6 @@ class StartScreen : public GameLogic {
 public:
 	void Init(ResourceManager& res_manager);
 
-	void Update(float dt, uint32_t input_state, uint32_t input_events);
+	void Update(float dt, uint32_t input_state, uint32_t input_events, PacmanApp* app);
 	void Render(float dt, SDL_Renderer* renderer);
 };

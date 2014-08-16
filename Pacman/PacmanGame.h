@@ -9,7 +9,6 @@ enum TILE_TYPE {
 	EMPTY,
 	FOOD,
 	SPAWN
-
 };
 class TileMap {
 	uint8_t* tiles_;
