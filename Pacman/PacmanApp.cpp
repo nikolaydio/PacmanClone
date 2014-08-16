@@ -95,5 +95,7 @@ void PacmanApp::Run() {
 }
 void PacmanApp::Done() {
 	res_manager.Cleanup();
+	TTF_Quit();
+	IMG_Quit();
 	SDL_Quit();
 }
