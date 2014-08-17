@@ -16,6 +16,11 @@ bool PacmanApp::Init() {
 	SDL_Init(SDL_INIT_EVERYTHING);
 	IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
 	TTF_Init();
+	if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0 )
+	{
+		printf( "SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError() );
+		return 0;
+	}
 
 	window = SDL_CreateWindow("Pacman Game", 
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 768, 480, 0);
@@ -28,18 +33,28 @@ bool PacmanApp::Init() {
 		return false;
 	}
 	res_manager.Init(renderer, "data/");
-	
+
 	start_screen.Init(res_manager);
+	pacman.Init(res_manager);
 	logic = &start_screen;
+
 
 	return true;
 }
 
 void PacmanApp::LoadGame(const char* filename) {
-
+	TileMap* map = LoadTileMap(filename);
+	if(!map) {
+		printf("Failed to load %s\n", filename);
+		return;
+	}
+	pacman.SetTilemap(map);
+	logic = &pacman;
+	status = IN_GAME;
 }
 void PacmanApp::LoadStartScreen() {
-
+	status = START_SCREEN;
+	logic = &start_screen;
 }
 void PacmanApp::ExitGame() {
 	status = GAME_EXITING;
@@ -95,6 +110,7 @@ void PacmanApp::Run() {
 }
 void PacmanApp::Done() {
 	res_manager.Cleanup();
+	Mix_CloseAudio();
 	TTF_Quit();
 	IMG_Quit();
 	SDL_Quit();

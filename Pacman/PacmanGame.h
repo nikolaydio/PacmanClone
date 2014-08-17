@@ -1,14 +1,17 @@
 #pragma once
 #include <cstdint>
 #include <cassert>
-
+#include "GameLogic.h"
+#include "Graphics.h"
 
 
 enum TILE_TYPE {
-	BLOCK,
-	EMPTY,
-	FOOD,
-	SPAWN
+	TT_BLOCK,
+	TT_EMPTY,
+	TT_FOOD,
+	TT_PACMAN,
+	TT_GHOST,
+	TT_TILE_COUNT
 };
 class TileMap {
 	uint8_t* tiles_;
@@ -31,26 +34,29 @@ public:
 		assert(y >= 0 && y < height_);
 		return tiles_[x + y * width_];
 	}
+	void SetTile(int x, int y, uint8_t tile) {
+		assert(x >= 0 && x < width_);
+		assert(y >= 0 && y < height_);
+		tiles_[x + y * width_] = tile;
+	}
+	int GetWidth() { return width_; }
+	int GetHeight() { return height_;}
 };
 
+TileMap* LoadTileMap(const char* filename);
 
-class PacmanGame {
+class PacmanGame : public GameLogic {
 	TileMap* tile_map;
+	struct TileData {
+		Texture tex;
+	};
+	TileData tiles[TT_TILE_COUNT];
 public:
-	PacmanGame() {
-		tile_map = 0;
-	}
-	void SetTilemap(TileMap* map) {
-		delete tile_map;
-		tile_map = map;
-	}
-	void Init() {
 
-	}
-	void Update(float dt) {
+	PacmanGame();
+	void Init(ResourceManager& res_manager);
+	void SetTilemap(TileMap* map);
 
-	}
-	void Done() {
-
-	}
+	void Update(float dt, uint32_t input_state, uint32_t input_events, PacmanApp* app);
+	void Render(float dt, SDL_Renderer* renderer);
 };

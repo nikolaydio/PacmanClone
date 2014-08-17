@@ -1,5 +1,6 @@
 #include "StartScreen.h"
 #include <SDL_ttf.h>
+#include <SDL_mixer.h>
 #include <cassert>
 #include "PacmanApp.h"
 
@@ -26,6 +27,12 @@ void StartScreen::Init(ResourceManager& res_manager) {
 	SDL_SetTextureAlphaMod(menu_entries[2].ptr, 100);
 
 	TTF_CloseFont(font);
+
+	background_music = Mix_LoadMUS("music/pacman-start.ogg");
+	if(background_music == 0) {
+		printf("Failed to load some sound files.\n");
+	}
+	Mix_PlayMusic(background_music, -1);
 }
 
 void StartScreen::Update(float dt, uint32_t input_state, uint32_t input_events, PacmanApp* app) {
@@ -41,7 +48,8 @@ void StartScreen::Update(float dt, uint32_t input_state, uint32_t input_events, 
 	}
 	if(input_events & INPUT_FIRE) {
 		if(selected == 0) {
-			app->LoadGame("data/level1.txt");
+			app->LoadGame("stages/level1.txt");
+			Mix_PauseMusic();
 			return;
 		}
 		if(selected == 2) {
@@ -49,6 +57,8 @@ void StartScreen::Update(float dt, uint32_t input_state, uint32_t input_events, 
 			return;
 		}
 	}
+	if(Mix_PausedMusic())
+		Mix_ResumeMusic();
 }
 void StartScreen::Render(float dt, SDL_Renderer* renderer) {
 	int width, height;
