@@ -89,6 +89,16 @@ public:
 		}
 		return pos;
 	}
+	int Count(uint8_t tile) {
+		int count = 0;
+		for(int i = 0; i < width_; ++i) {
+			for(int u = 0 ; u < height_; ++u) {
+				if(tile == GetTile(i, u))
+					++count;
+			}
+		}
+		return count;
+	}
 	int GetWidth() { return width_; }
 	int GetHeight() { return height_;}
 };
@@ -118,8 +128,15 @@ class PacmanGame : public GameLogic {
 		Vector2df next_ori;
 	};
 	TileData tiles[TT_TILE_COUNT];
-	int tile_size;
+
+	static const int tile_size = 20;
 	Pacman pacman;
+	int food_left;
+	int score;
+	GraphText score_text;
+	FontManager font_man;
+
+	void UpdatePacman(Vector2df pacman_tile, float dt);
 public:
 
 	PacmanGame();

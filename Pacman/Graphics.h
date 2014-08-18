@@ -2,6 +2,7 @@
 
 #include <SDL.h>
 #undef main
+#include <SDL_ttf.h>
 #include <unordered_map>
 #include <string>
 
@@ -30,4 +31,25 @@ public:
 	void AddTexture(const std::string& key, Texture tex);
 	Texture AddSurface(const std::string& key, SDL_Surface* surf);
 	void Cleanup();
+};
+
+class FontManager {
+	std::unordered_map<std::string, std::unordered_map<int, TTF_Font*>> fonts;
+	std::string prefix;
+public:
+	TTF_Font* GetFont(const char* name, int size);
+	void Cleanup();
+};
+
+class GraphText {
+	std::string text;
+	bool dirty;
+	TTF_Font* font;
+	Texture tex;
+public:
+	GraphText();
+	~GraphText();
+	void UpdateText(const std::string& str);
+	Texture GetTexture(SDL_Renderer* renderer);
+	void SetFont(TTF_Font* f);
 };

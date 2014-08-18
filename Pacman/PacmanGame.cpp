@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "PacmanApp.h"
+#include <sstream>
 
 bool is_new_line(char ch) {
 	return ch == '\n' || ch == '\r';
@@ -79,7 +80,6 @@ TileMap* LoadTileMap(const char* filename) {
 
 PacmanGame::PacmanGame() {
 	tile_map = 0;
-	tile_size = 20;
 }
 void PacmanGame::Init(ResourceManager& res_manager) {
 	tiles[TT_BLOCK].tex = res_manager.GetTexture("block-temp.png");
@@ -103,6 +103,10 @@ void PacmanGame::SetTilemap(TileMap* map) {
 	Vector2d tile = tile_map->Search(TT_PACMAN);
 	pacman.position = Vector2df(tile.x * tile_size, tile.y * tile_size);
 	pacman.target_pos = pacman.position;
+	food_left = tile_map->Count(TT_FOOD);
+	score = 0;
+	score_text.UpdateText("Score: 0");
+	score_text.SetFont(font_man.GetFont("micross.ttf", 24));
 }
 
 void PacmanGame::Update(float dt, uint32_t input_state, uint32_t input_events, PacmanApp* app) {
@@ -129,6 +133,26 @@ void PacmanGame::Update(float dt, uint32_t input_state, uint32_t input_events, P
 	pacman_tile.x = floor(pacman_tile.x);
 	pacman_tile.y = floor(pacman_tile.y);
 
+
+
+	//food collection
+	if(tile_map->GetTile(pacman_tile.x, pacman_tile.y) == TT_FOOD) {
+		tile_map->SetTile(pacman_tile.x, pacman_tile.y, TT_EMPTY);
+		food_left--;
+		score += 10;
+
+		std::stringstream s;
+		s << "Score: ";
+		s << score;
+		score_text.UpdateText(s.str());
+		if(food_left == 0) {
+			app->LoadStartScreen();
+		}
+	}
+
+	UpdatePacman(pacman_tile, dt);
+}
+void PacmanGame::UpdatePacman(Vector2df pacman_tile, float dt) {
 	//pacman movement code
 	if(pacman.target_pos.x == pacman.position.x
 		&& pacman.target_pos.y == pacman.position.y) {
@@ -144,13 +168,6 @@ void PacmanGame::Update(float dt, uint32_t input_state, uint32_t input_events, P
 				}
 			}
 	}
-
-	//food collection
-	if(tile_map->GetTile(pacman_tile.x, pacman_tile.y) == TT_FOOD) {
-		tile_map->SetTile(pacman_tile.x, pacman_tile.y, TT_EMPTY);
-	}
-
-
 	Vector2df velo = pacman.target_pos - pacman.position;
 	float dist = velo.len();
 	pacman.position = pacman.position + velo.normalized() * std::min(dist, 100 * dt);
@@ -159,12 +176,13 @@ void PacmanGame::Render(float dt, SDL_Renderer* renderer) {
 	if(!tile_map) { 
 		return;
 	}
+	int offset_y = 100;
 	SDL_Rect rect;
 	SDL_Rect src;
 	for(int x = 0; x < tile_map->GetWidth(); ++x) {
 		for(int y = 0; y < tile_map->GetHeight(); ++y) {
 			rect.x = x * tile_size;
-			rect.y = y * tile_size;
+			rect.y = y * tile_size + offset_y;
 			rect.w = tile_size;
 			rect.h = tile_size;
 			SDL_RenderCopy(renderer, tiles[tile_map->GetTile(x, y)].tex.ptr, 0, &rect);
@@ -180,9 +198,15 @@ void PacmanGame::Render(float dt, SDL_Renderer* renderer) {
 	src.w = pacman.sprite_size.x;
 	src.h = pacman.sprite_size.y;
 	rect.x = pacman.position.x;
-	rect.y = pacman.position.y;
+	rect.y = pacman.position.y + offset_y;
 	rect.w = tile_size;
 	rect.h = tile_size;
 
 	SDL_RenderCopy(renderer, sprite_sheet.ptr, &src, &rect);
+
+	rect.x = 0;
+	rect.y = 0;
+	rect.w = score_text.GetTexture(renderer).width;
+	rect.h = score_text.GetTexture(renderer).height;
+	SDL_RenderCopy(renderer, score_text.GetTexture(renderer).ptr, 0, &rect);
 }

@@ -70,3 +70,67 @@ void ResourceManager::Cleanup() {
 	}
 	textures.clear();
 }
+
+
+GraphText::GraphText() {
+	this->dirty = true;
+}
+GraphText::~GraphText() {
+	if(tex.ptr)
+		SDL_DestroyTexture(tex.ptr);
+}
+void GraphText::UpdateText(const std::string& str) {
+	if(str != this->text)
+	{
+		this->text = str;
+		this->dirty = true;
+	}
+}
+Texture GraphText::GetTexture(SDL_Renderer* renderer) {
+	if(dirty) {
+		SDL_Color clr;
+		clr.a = 255; clr.r = 255; clr.g = 255; clr.b = 255;
+		SDL_Surface* s = TTF_RenderText_Blended(font, text.c_str(), clr);
+		if(!s) {
+			return tex;
+		}
+		if(tex.ptr)
+			SDL_DestroyTexture(tex.ptr);
+		tex.ptr = SDL_CreateTextureFromSurface(renderer, s);
+		tex.height = s->h;
+		tex.width = s->w;
+		SDL_FreeSurface(s);
+		dirty = false;
+	}
+	return tex;
+}
+void GraphText::SetFont(TTF_Font* f) {
+	font = f;
+}
+
+TTF_Font* FontManager::GetFont(const char* name, int size) {
+	auto i = fonts.find(name);
+	if(i != fonts.end()) {
+		auto j = i->second.find(size);
+		if(j != i->second.end()) {
+			return j->second;
+		}
+	}
+	TTF_Font* ttf_f = TTF_OpenFont((prefix + name).c_str(), size);
+	if(!ttf_f)
+		return 0;
+	fonts[name][size] = ttf_f;
+	return ttf_f;
+}
+void FontManager::Cleanup() {
+	auto i = fonts.begin();
+	auto end = fonts.end();
+	for(; i != end; ++i) {
+		auto i1 = i->second.begin();
+		auto end1 = i->second.end();
+		for(; i1 != end1; ++i1) {
+			TTF_CloseFont(i1->second);
+		}
+	}
+	fonts.clear();
+}
