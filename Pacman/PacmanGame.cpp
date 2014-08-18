@@ -95,6 +95,10 @@ Vector2df tile_to_pos(Vector2d tile, float tile_size) {
 void PacmanGame::SetTilemap(TileMap* map) {
 	delete tile_map;
 	tile_map = map;
+
+	tile_size = 640 / tile_map->GetWidth();
+	tile_size = std::min(tile_size, 380 / tile_map->GetHeight());
+
 	//this is also the "reset" function
 	pacman.current_state = 0;
 	pacman.ori = Vector2df(-1, 0);
@@ -134,6 +138,7 @@ void PacmanGame::SetTilemap(TileMap* map) {
 	}
 	mode = CHASE;
 	time_in_mode = 0;
+ 
 }
 Vector2df GetTileFromPosition(Vector2df pos, float tile_size) {
 	Vector2df r;
@@ -298,6 +303,8 @@ void PacmanGame::Render(float dt, SDL_Renderer* renderer) {
 		return;
 	}
 	int offset_y = 100;
+
+
 	SDL_Rect rect;
 	SDL_Rect src;
 	for(int x = 0; x < tile_map->GetWidth(); ++x) {
@@ -337,7 +344,6 @@ void PacmanGame::Render(float dt, SDL_Renderer* renderer) {
 		rect.h = tile_size;
 		SDL_RenderCopy(renderer, sprite_sheet.ptr, &src, &rect);
 	}
-	SDL_SetRenderDrawColor(renderer, 255,255,255,255);
 
 	//render score
 	
@@ -346,6 +352,4 @@ void PacmanGame::Render(float dt, SDL_Renderer* renderer) {
 	rect.w = score_text.GetTexture(renderer).width;
 	rect.h = score_text.GetTexture(renderer).height;
 	SDL_RenderCopy(renderer, score_text.GetTexture(renderer).ptr, 0, &rect);
-
-
 }

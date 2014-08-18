@@ -166,7 +166,8 @@ class PacmanGame : public GameLogic {
 	};
 	TileData tiles[TT_TILE_COUNT];
 
-	static const int tile_size = 30;
+	int tile_size;
+
 	Pacman pacman;
 	Ghost ghost[GT_COUNT];
 
