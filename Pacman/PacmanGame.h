@@ -175,6 +175,7 @@ class PacmanGame : public GameLogic {
 	GraphText score_text;
 	FontManager font_man;
 	GHOST_MODE mode;
+	float time_in_mode;
 	
 
 	void UpdatePacman(Vector2df pacman_tile, float dt);

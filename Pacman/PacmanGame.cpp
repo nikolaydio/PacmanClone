@@ -133,11 +133,12 @@ void PacmanGame::SetTilemap(TileMap* map) {
 		ghost[i].target_tile = Vector2df(ghost[i].scatter_tile.x, ghost[i].scatter_tile.y);
 	}
 	mode = CHASE;
+	time_in_mode = 0;
 }
 Vector2df GetTileFromPosition(Vector2df pos, float tile_size) {
 	Vector2df r;
-	r.x = floor((pos.x - tile_size / 2) / tile_size);
-	r.y = floor((pos.y - tile_size / 2) / tile_size);
+	r.x = floor((pos.x + tile_size / 2) / tile_size);
+	r.y = floor((pos.y + tile_size / 2) / tile_size);
 	return r;
 }
 void PacmanGame::Update(float dt, uint32_t input_state, uint32_t input_events, PacmanApp* app) {
@@ -166,8 +167,20 @@ void PacmanGame::Update(float dt, uint32_t input_state, uint32_t input_events, P
 
 
 	//update ghosts
+	if(time_in_mode > 10) {
+		time_in_mode = 0;
+		if(mode == SCATTER)
+			mode = CHASE;
+		else
+			mode = SCATTER;
+	}
+	time_in_mode += dt;
+
 	for(int i = 0; i < GT_COUNT; ++i) {
 		UpdateGhost(ghost[i], dt);
+		Vector2d tile = GetTileFromPosition(ghost[i].position, tile_size);
+		if(tile.x == pacman_tile.x && tile.y == pacman_tile.y)
+			app->LoadStartScreen();
 	}
 	if(mode == SCATTER) {
 		for(int i = 0; i < GT_COUNT; ++i) {
