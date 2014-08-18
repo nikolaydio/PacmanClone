@@ -39,6 +39,7 @@ class FontManager {
 public:
 	TTF_Font* GetFont(const char* name, int size);
 	void Cleanup();
+	void SetPrefix(const std::string& p);
 };
 
 class GraphText {

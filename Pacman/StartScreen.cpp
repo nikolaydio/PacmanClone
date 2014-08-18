@@ -6,10 +6,11 @@
 #include <sstream>
 
 void StartScreen::Init(ResourceManager& res_manager) {
+	fonts.SetPrefix("fonts/");
 	//setup start screen;
 	background = res_manager.GetTexture("wallpaper.png");
 	selected = 0;
-	TTF_Font* font = TTF_OpenFont("ROCKSTEADY.ttf", 36);
+	TTF_Font* font = fonts.GetFont("ROCKSTEADY.ttf", 36);
 	assert(font);
 	SDL_Color color;
 	color.a = 255;

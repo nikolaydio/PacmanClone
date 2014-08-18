@@ -134,3 +134,6 @@ void FontManager::Cleanup() {
 	}
 	fonts.clear();
 }
+void FontManager::SetPrefix(const std::string& p) {
+	prefix = p;
+}

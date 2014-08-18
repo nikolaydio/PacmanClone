@@ -88,6 +88,9 @@ void PacmanGame::Init(ResourceManager& res_manager) {
 	tiles[TT_PACMAN].tex = res_manager.GetTexture("empty-tile1.png");
 	tiles[TT_GHOST].tex = res_manager.GetTexture("empty-tile1.png");
 	sprite_sheet = res_manager.GetTexture("sprite_sheet.png");
+
+	font_man.SetPrefix("fonts/");
+	
 }
 Vector2df tile_to_pos(Vector2d tile, float tile_size) {
 	return Vector2df(tile.x * tile_size, tile.y * tile_size);
