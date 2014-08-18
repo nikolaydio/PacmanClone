@@ -14,7 +14,6 @@ class PacmanApp {
 	enum GAME_STATUS {
 		START_SCREEN,
 		IN_GAME,
-		SCORE,
 		GAME_EXITING
 	};
 
@@ -32,6 +31,8 @@ public:
 
 	void LoadGame(const char* filename);
 	void LoadStartScreen();
+	void LoadScore(bool victory, int score);
+
 	void ExitGame();
 
 	bool Init();

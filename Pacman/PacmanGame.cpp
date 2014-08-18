@@ -185,7 +185,7 @@ void PacmanGame::Update(float dt, uint32_t input_state, uint32_t input_events, P
 		UpdateGhost(ghost[i], dt);
 		Vector2d tile = GetTileFromPosition(ghost[i].position, tile_size);
 		if(tile.x == pacman_tile.x && tile.y == pacman_tile.y)
-			app->LoadStartScreen();
+			app->LoadScore(false, score);
 	}
 	if(mode == SCATTER) {
 		for(int i = 0; i < GT_COUNT; ++i) {
@@ -214,7 +214,7 @@ void PacmanGame::Update(float dt, uint32_t input_state, uint32_t input_events, P
 		s << score;
 		score_text.UpdateText(s.str());
 		if(food_left == 0) {
-			app->LoadStartScreen();
+			app->LoadScore(true, score);
 		}
 	}
 

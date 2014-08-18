@@ -90,7 +90,7 @@ Texture GraphText::GetTexture(SDL_Renderer* renderer) {
 	if(dirty) {
 		SDL_Color clr;
 		clr.a = 255; clr.r = 255; clr.g = 255; clr.b = 255;
-		SDL_Surface* s = TTF_RenderText_Blended(font, text.c_str(), clr);
+		SDL_Surface* s = TTF_RenderText_Blended_Wrapped(font, text.c_str(), clr, 600);
 		if(!s) {
 			return tex;
 		}

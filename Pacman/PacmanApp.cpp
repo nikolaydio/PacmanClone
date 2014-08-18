@@ -56,6 +56,11 @@ void PacmanApp::LoadStartScreen() {
 	status = START_SCREEN;
 	logic = &start_screen;
 }
+void PacmanApp::LoadScore(bool victory, int score) {
+	status = START_SCREEN;
+	logic = &start_screen;
+	start_screen.Stats(victory, score);
+}
 void PacmanApp::ExitGame() {
 	status = GAME_EXITING;
 }
