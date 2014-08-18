@@ -175,7 +175,7 @@ void PacmanGame::Update(float dt, uint32_t input_state, uint32_t input_events, P
 
 
 	//update ghosts
-	if(time_in_mode > 10) {
+	if(time_in_mode > 5) {
 		time_in_mode = 0;
 		if(mode == SCATTER)
 			mode = CHASE;
@@ -225,8 +225,9 @@ void PacmanGame::Update(float dt, uint32_t input_state, uint32_t input_events, P
 }
 void PacmanGame::UpdatePacman(Vector2df pacman_tile, float dt) {
 	//pacman movement code
-	if(pacman.target_pos.x == pacman.position.x
-		&& pacman.target_pos.y == pacman.position.y) {
+	if((pacman.target_pos.x == pacman.position.x
+		&& pacman.target_pos.y == pacman.position.y) ||
+		(pacman.next_ori == -pacman.ori)) {
 
 			Vector2df next_tile = pacman_tile + pacman.next_ori;
 			if(is_walkable(tile_map->GetTile(next_tile.x, next_tile.y))) {
@@ -241,7 +242,7 @@ void PacmanGame::UpdatePacman(Vector2df pacman_tile, float dt) {
 	}
 	Vector2df velo = pacman.target_pos - pacman.position;
 	float dist = velo.len();
-	pacman.position = pacman.position + velo.normalized() * std::min(dist, 100 * dt);
+	pacman.position = pacman.position + velo.normalized() * std::min(dist, 160 * dt);
 }
 void PacmanGame::UpdateGhost(Ghost& gh, float dt) {
 	if(gh.short_target.x == gh.position.x) {
@@ -299,7 +300,7 @@ void PacmanGame::UpdateGhost(Ghost& gh, float dt) {
 	}
 	Vector2df velo = gh.short_target - gh.position;
 	float dist = velo.len();
-	gh.position = gh.position + velo.normalized() * std::min(dist, 100 * dt);
+	gh.position = gh.position + velo.normalized() * std::min(dist, 160 * dt);
 }
 void PacmanGame::Render(float dt, SDL_Renderer* renderer) {
 	if(!tile_map) { 

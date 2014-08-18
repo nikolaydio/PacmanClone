@@ -77,6 +77,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)\3rdParty\SDL2_image-2.0.0\include;$(SolutionDir)\3rdParty\SDL2_mixer-2.0.0\include;$(SolutionDir)\3rdParty\SDL2_ttf-2.0.12\include;$(SolutionDir)\3rdParty\SDL2-2.0.3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

@@ -53,6 +53,12 @@ struct Vector2df {
 			return true;
 		return false;
 	}
+	bool operator==(const Vector2df& vec) const {
+		return !((*this)!=vec);
+	}
+	Vector2df operator-() const {
+		return Vector2df(-x, -y);
+	}
 
 	float x, y;
 };
