@@ -14,6 +14,17 @@ enum TILE_TYPE {
 	TT_GHOST,
 	TT_TILE_COUNT
 };
+enum GHOST_TYPE {
+	GT_RED,
+	GT_PINK,
+	GT_BLUE,
+	GT_ORANGE,
+	GT_COUNT
+};
+enum GHOST_MODE {
+	SCATTER,
+	CHASE
+};
 struct Vector2df {
 	Vector2df() {}
 	Vector2df(float x_, float y_) : x(x_), y(y_) {}
@@ -35,6 +46,13 @@ struct Vector2df {
 			l = 1;
 		return Vector2df(x / l, y / l);
 	}
+	bool operator!=(const Vector2df& vec) const {
+		if(x != vec.x)
+			return true;
+		if(y != vec.y)
+			return true;
+		return false;
+	}
 
 	float x, y;
 };
@@ -50,6 +68,13 @@ struct Vector2d {
 	}
 	Vector2df operator*(float factor) const {
 		return Vector2df(x * factor, y * factor);
+	}
+	bool operator!=(const Vector2d& vec) const {
+		if(x != vec.x)
+			return true;
+		if(y != vec.y)
+			return true;
+		return false;
 	}
 	int x, y;
 };
@@ -127,16 +152,33 @@ class PacmanGame : public GameLogic {
 		//next one
 		Vector2df next_ori;
 	};
+	struct Ghost {
+		Vector2df target_tile;
+		Vector2df position;
+		Vector2df short_target;
+		Vector2d ori;
+
+		Vector2df sheet_offset;
+		Vector2df sheet_stride;
+		Vector2df sprite_size;
+
+		Vector2d scatter_tile;
+	};
 	TileData tiles[TT_TILE_COUNT];
 
-	static const int tile_size = 20;
+	static const int tile_size = 30;
 	Pacman pacman;
+	Ghost ghost[GT_COUNT];
+
 	int food_left;
 	int score;
 	GraphText score_text;
 	FontManager font_man;
+	GHOST_MODE mode;
+	
 
 	void UpdatePacman(Vector2df pacman_tile, float dt);
+	void UpdateGhost(Ghost& gh, float dt);
 public:
 
 	PacmanGame();

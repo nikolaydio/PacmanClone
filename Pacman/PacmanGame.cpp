@@ -17,7 +17,7 @@ uint8_t char_to_tile(char ch) {
 		return TT_PACMAN;
 	}else if(ch == 'G') {
 		return TT_GHOST;
-	}else if(ch == 'F') {
+	}else if(ch == '!') {
 		return TT_FOOD;
 	}
 	return 255;
@@ -89,6 +89,9 @@ void PacmanGame::Init(ResourceManager& res_manager) {
 	tiles[TT_GHOST].tex = res_manager.GetTexture("empty-tile1.png");
 	sprite_sheet = res_manager.GetTexture("sprite_sheet.png");
 }
+Vector2df tile_to_pos(Vector2d tile, float tile_size) {
+	return Vector2df(tile.x * tile_size, tile.y * tile_size);
+}
 void PacmanGame::SetTilemap(TileMap* map) {
 	delete tile_map;
 	tile_map = map;
@@ -107,8 +110,36 @@ void PacmanGame::SetTilemap(TileMap* map) {
 	score = 0;
 	score_text.UpdateText("Score: 0");
 	score_text.SetFont(font_man.GetFont("micross.ttf", 24));
-}
 
+	//init ghosts
+	Vector2d ghost_spawn = tile_map->Search(TT_GHOST);
+	ghost[GT_RED].position = tile_to_pos(ghost_spawn + Vector2d(0, -1), tile_size);
+	ghost[GT_RED].scatter_tile = Vector2d(tile_map->GetWidth(), 0);
+
+	ghost[GT_PINK].position = tile_to_pos(ghost_spawn + Vector2d(0, 0), tile_size);
+	ghost[GT_PINK].scatter_tile = Vector2d(0, 0);
+
+	ghost[GT_BLUE].position = tile_to_pos(ghost_spawn + Vector2d(-1, 0), tile_size);
+	ghost[GT_BLUE].scatter_tile = Vector2d(tile_map->GetWidth(), tile_map->GetHeight());
+
+	ghost[GT_ORANGE].position = tile_to_pos(ghost_spawn + Vector2d(1, 0), tile_size);
+	ghost[GT_ORANGE].scatter_tile = Vector2d(0, tile_map->GetHeight());
+
+	for(int i = 0; i < GT_COUNT; ++i) {
+		ghost[i].sprite_size = Vector2df(16,16);
+		ghost[i].sheet_offset = Vector2df(16 * i, 0);
+		ghost[i].short_target = ghost[i].position;
+		ghost[i].ori = Vector2df(0, -1);
+		ghost[i].target_tile = Vector2df(ghost[i].scatter_tile.x, ghost[i].scatter_tile.y);
+	}
+	mode = CHASE;
+}
+Vector2df GetTileFromPosition(Vector2df pos, float tile_size) {
+	Vector2df r;
+	r.x = floor((pos.x - tile_size / 2) / tile_size);
+	r.y = floor((pos.y - tile_size / 2) / tile_size);
+	return r;
+}
 void PacmanGame::Update(float dt, uint32_t input_state, uint32_t input_events, PacmanApp* app) {
 	if(input_events & INPUT_ESC) {
 		app->LoadStartScreen();
@@ -134,6 +165,25 @@ void PacmanGame::Update(float dt, uint32_t input_state, uint32_t input_events, P
 	pacman_tile.y = floor(pacman_tile.y);
 
 
+	//update ghosts
+	for(int i = 0; i < GT_COUNT; ++i) {
+		UpdateGhost(ghost[i], dt);
+	}
+	if(mode == SCATTER) {
+		for(int i = 0; i < GT_COUNT; ++i) {
+			ghost[i].target_tile = Vector2df(ghost[i].scatter_tile.x, ghost[i].scatter_tile.y);
+		}
+	}else{
+		ghost[GT_RED].target_tile = pacman_tile;
+		ghost[GT_PINK].target_tile = pacman_tile + pacman.ori * 4;
+		Vector2df red_tile = GetTileFromPosition(ghost[GT_RED].position, tile_size);
+		ghost[GT_BLUE].target_tile = red_tile + ((pacman_tile + pacman.ori * 2) - red_tile) * 2;
+		if((pacman.position - ghost[GT_ORANGE].position).len() < tile_size * 8) {
+			ghost[GT_ORANGE].target_tile = Vector2df(ghost[GT_ORANGE].scatter_tile.x, ghost[GT_ORANGE].scatter_tile.y);
+		}else{
+			ghost[GT_ORANGE].target_tile = pacman_tile;
+		}
+	}
 
 	//food collection
 	if(tile_map->GetTile(pacman_tile.x, pacman_tile.y) == TT_FOOD) {
@@ -172,6 +222,64 @@ void PacmanGame::UpdatePacman(Vector2df pacman_tile, float dt) {
 	float dist = velo.len();
 	pacman.position = pacman.position + velo.normalized() * std::min(dist, 100 * dt);
 }
+void PacmanGame::UpdateGhost(Ghost& gh, float dt) {
+	if(gh.short_target.x == gh.position.x) {
+		if(gh.short_target.y == gh.position.y) {
+			Vector2d potential_tiles[3];
+			Vector2d ghost_tile;
+			Vector2df ghost_center = gh.position + Vector2df(tile_size / 2, tile_size / 2);
+			ghost_tile.x = floor(ghost_center.x / tile_size);
+			ghost_tile.y = floor(ghost_center.y / tile_size);
+
+			backward:
+			int potentials = 0;
+			//check left
+			if(Vector2d(1, 0) != gh.ori) {
+				Vector2d v = Vector2d(-1, 0) + ghost_tile;
+				if(is_walkable(tile_map->GetTile(v.x, v.y)))
+					potential_tiles[potentials++] = v;
+			}
+			//check right
+			if(Vector2d(-1, 0) != gh.ori)  {
+				Vector2d v = Vector2d(1, 0) + ghost_tile;
+				if(is_walkable(tile_map->GetTile(v.x, v.y)))
+					potential_tiles[potentials++] = v;
+			}
+			//check up
+			if(Vector2d(0, 1) != gh.ori) {
+				Vector2d v = Vector2d(0, -1) + ghost_tile;
+				if(is_walkable(tile_map->GetTile(v.x, v.y)))
+					potential_tiles[potentials++] = v;
+			}
+			//check down
+			if(Vector2d(0, -1) != gh.ori)  {
+				Vector2d v = Vector2d(0, 1) + ghost_tile;
+				if(is_walkable(tile_map->GetTile(v.x, v.y)))
+					potential_tiles[potentials++] = v;
+			}
+			if(potentials == 0) {
+				gh.ori = Vector2df(-gh.ori.x, -gh.ori.y);
+				goto backward;
+			}
+
+			Vector2d best = potential_tiles[0];
+			for(int u = 1; u < potentials; ++u) {
+				float curr_fitness = (gh.target_tile - Vector2df(potential_tiles[u].x, potential_tiles[u].y)).len();
+				float best_fitness = (gh.target_tile - Vector2df(best.x, best.y)).len();
+				if(curr_fitness < best_fitness) {
+					best = potential_tiles[u];
+				}
+			}
+
+			//update short term + ori
+			gh.short_target = Vector2df(best.x, best.y) * tile_size;
+			gh.ori = Vector2d(best.x - ghost_tile.x, best.y - ghost_tile.y);
+		}
+	}
+	Vector2df velo = gh.short_target - gh.position;
+	float dist = velo.len();
+	gh.position = gh.position + velo.normalized() * std::min(dist, 100 * dt);
+}
 void PacmanGame::Render(float dt, SDL_Renderer* renderer) {
 	if(!tile_map) { 
 		return;
@@ -204,9 +312,27 @@ void PacmanGame::Render(float dt, SDL_Renderer* renderer) {
 
 	SDL_RenderCopy(renderer, sprite_sheet.ptr, &src, &rect);
 
+	//render ghosts
+	for(int i = 0; i < GT_COUNT; ++i) {
+		src.x = ghost[i].sheet_offset.x;
+		src.y = ghost[i].sheet_offset.y;
+		src.w = ghost[i].sprite_size.x;
+		src.h = ghost[i].sprite_size.y;
+		rect.x = ghost[i].position.x;
+		rect.y = ghost[i].position.y + offset_y;
+		rect.w = tile_size;
+		rect.h = tile_size;
+		SDL_RenderCopy(renderer, sprite_sheet.ptr, &src, &rect);
+	}
+	SDL_SetRenderDrawColor(renderer, 255,255,255,255);
+
+	//render score
+	
 	rect.x = 0;
 	rect.y = 0;
 	rect.w = score_text.GetTexture(renderer).width;
 	rect.h = score_text.GetTexture(renderer).height;
 	SDL_RenderCopy(renderer, score_text.GetTexture(renderer).ptr, 0, &rect);
+
+
 }
