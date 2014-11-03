@@ -25,8 +25,8 @@ enum GHOST_MODE {
 	SCATTER,
 	CHASE
 };
-#define GHOST_SPEED 140
-#define PACMAN_SPEED 140
+#define GHOST_SPEED 2.7f
+#define PACMAN_SPEED 3.0f
 struct Vector2df {
 	Vector2df() {}
 	Vector2df(float x_, float y_) : x(x_), y(y_) {}

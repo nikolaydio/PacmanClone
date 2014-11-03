@@ -23,7 +23,7 @@ bool PacmanApp::Init() {
 	}
 
 	window = SDL_CreateWindow("Pacman Game", 
-		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 768, 480, 0);
+		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_SIZE_X, WINDOW_SIZE_Y, 0);
 	if(!window) {
 		return false;
 	}

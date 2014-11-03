@@ -8,7 +8,8 @@
 #include "StartScreen.h"
 
 
-
+#define WINDOW_SIZE_X 640
+#define WINDOW_SIZE_Y 480
 
 class PacmanApp {
 	enum GAME_STATUS {
@@ -26,6 +27,7 @@ class PacmanApp {
 
 	StartScreen start_screen;
 	PacmanGame pacman;
+
 public:
 	PacmanApp();
 

@@ -4,6 +4,8 @@
 #include <vector>
 #include "PacmanApp.h"
 #include <sstream>
+//for std::min and max
+#include <algorithm>
 
 bool is_new_line(char ch) {
 	return ch == '\n' || ch == '\r';
@@ -99,8 +101,8 @@ void PacmanGame::SetTilemap(TileMap* map) {
 	delete tile_map;
 	tile_map = map;
 
-	tile_size = 640 / tile_map->GetWidth();
-	tile_size = std::min(tile_size, 380 / tile_map->GetHeight());
+	tile_size = WINDOW_SIZE_X / tile_map->GetWidth();
+	tile_size = std::min(tile_size, (WINDOW_SIZE_Y - 100) / tile_map->GetHeight());
 
 	//this is also the "reset" function
 	pacman.current_state = 0;
@@ -242,7 +244,7 @@ void PacmanGame::UpdatePacman(Vector2df pacman_tile, float dt) {
 	}
 	Vector2df velo = pacman.target_pos - pacman.position;
 	float dist = velo.len();
-	pacman.position = pacman.position + velo.normalized() * std::min(dist, PACMAN_SPEED * dt);
+	pacman.position = pacman.position + velo.normalized() * std::min(dist, PACMAN_SPEED * dt * tile_size);
 }
 void PacmanGame::UpdateGhost(Ghost& gh, float dt) {
 	if(gh.short_target.x == gh.position.x) {
@@ -300,7 +302,7 @@ void PacmanGame::UpdateGhost(Ghost& gh, float dt) {
 	}
 	Vector2df velo = gh.short_target - gh.position;
 	float dist = velo.len();
-	gh.position = gh.position + velo.normalized() * std::min(dist, GHOST_SPEED * dt);
+	gh.position = gh.position + velo.normalized() * std::min(dist, GHOST_SPEED * dt * tile_size);
 }
 void PacmanGame::Render(float dt, SDL_Renderer* renderer) {
 	if(!tile_map) { 
